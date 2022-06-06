@@ -1,33 +1,77 @@
-spring:
-    datasource:
-        type: com.alibaba.druid.pool.DruidDataSource
-        druid:
-            driver-class-name: com.mysql.jdbc.Driver
-            url: jdbc:mysql://localhost:3306/jdbcstudy?allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&useSSL=false
-            username: root
-            password: yk123
-            initial-size: 10
-            max-active: 100
-            min-idle: 10
-            max-wait: 60000
-            pool-prepared-statements: true
-            max-pool-prepared-statement-per-connection-size: 20
-            time-between-eviction-runs-millis: 60000
-            min-evictable-idle-time-millis: 300000
-            test-while-idle: true
-            test-on-borrow: false
-            test-on-return: false
-            stat-view-servlet:
-                enabled: true
-                url-pattern: /druid/*
-                login-username: admin
-                login-password: admin
-            filter:
-                stat:
-                    log-slow-sql: true
-                    slow-sql-millis: 1000
-                    merge-sql: false
-                wall:
-                    config:
-                        multi-statement-allow: true
+#spring:
+#    datasource:
+#        type: com.alibaba.druid.pool.DruidDataSource
+#        druid:
+#            driver-class-name: com.mysql.jdbc.Driver
+#            url: jdbc:mysql://localhost:3306/jdbcstudy?allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&useSSL=false
+#            username: root
+#            password: 123456
+#            initial-size: 10
+#            max-active: 100
+#            min-idle: 10
+#            max-wait: 60000
+#            pool-prepared-statements: true
+#            max-pool-prepared-statement-per-connection-size: 20
+#            time-between-eviction-runs-millis: 60000
+#            min-evictable-idle-time-millis: 300000
+#            test-while-idle: true
+#            test-on-borrow: false
+#            test-on-return: false
+#            stat-view-servlet:
+#                enabled: true
+#                url-pattern: /druid/*
+#                login-username: admin
+#                login-password: admin
+#            filter:
+#                stat:
+#                    log-slow-sql: true
+#                    slow-sql-millis: 1000
+#                    merge-sql: false
+#                wall:
+#                    config:
+#                        multi-statement-allow: true
 
+
+spring:
+  shardingsphere:
+    mode:
+      type: Memory
+    datasource:
+      names: ds
+      ds:
+        type: com.zaxxer.hikari.HikariDataSource
+        driverClassName: com.mysql.jdbc.Driver
+        url: jdbc:mysql://localhost:3306/jdbcstudy?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&useTimezone=true
+        username: root
+        password: 123456
+
+    rules:
+      sharding:
+        binding-tables:
+          - user
+        key-generators:
+          snowflake:
+            type: SNOWFLAKE
+        sharding-algorithms:
+          t-order-inline:
+            props:
+              algorithm-expression: user_$->{id % 10}
+            type: INLINE
+
+        tables:
+          user:
+            actual-data-nodes: ds.user_$->{0..9}
+            key-generate-strategy:
+              column: id
+              key-generator-name: snowflake
+            table-strategy:
+              standard:
+                sharding-algorithm-name: t-order-inline
+                sharding-column: id
+
+
+
+logging:
+  level:
+    com.baomidou: debug
+    org.apache.shardingsphere: debug

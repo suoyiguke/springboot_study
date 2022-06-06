@@ -25,7 +25,7 @@ public class UserController {
      * 分页查询
      * @param cPage
      * @param pSize
-     * @return R
+     * http://localhost:8080/test/user/list?cPage=0&pSize=10
      */
     @RequestMapping("/list")
     public R list(Integer cPage,Integer pSize){
@@ -70,7 +70,11 @@ public class UserController {
         );
         return R.ok(b);
     }
-
+    /**
+     * @Des http://localhost:8080/test/user/addUser?name=yinkai&age=25&email=2542847562@qq.com
+     * @Author yinkai
+     * @Date 2022/6/6 18:55
+     */
     @RequestMapping("/addUser")
     public R addUser(String name,Integer age,String email){
 
