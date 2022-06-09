@@ -5,14 +5,13 @@ server:
     max-threads: 1000
     min-spare-threads: 30
   port: 8080
-  connection-timeout: 5000ms
   servlet:
     context-path: /test
 
 spring:
   # 环境 dev|test|prod
   profiles:
-    active: dev
+    active: 3
   servlet:
     multipart:
       max-file-size: 100MB
@@ -41,7 +40,9 @@ mybatis-plus:
     banner: false
   #原生配置
   configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     map-underscore-to-camel-case: true
     cache-enabled: false
     call-setters-on-nulls: true
     jdbc-type-for-null: 'null'
+

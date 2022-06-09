@@ -37,9 +37,10 @@ public class UserController {
      * 根据id查询
      * @param id
      * @return R
+     * http://localhost:8080/test/user/getById?id=740987882952458240
      */
     @RequestMapping("/getById")
-    public R getById(Integer id){
+    public R getById(Long id){
         User IPage = userService.getById(id);
         return R.ok(IPage);
     }
@@ -48,9 +49,10 @@ public class UserController {
      * 根据id删除
      * @param id
      * @return R
+     * http://localhost:8080/test/user/deleteById?id=740987882952458240
      */
     @RequestMapping("/deleteById")
-    public R deleteById(Integer id){
+    public R deleteById(Long id){
         boolean b = userService.removeById(id);
         return R.ok(b);
     }
@@ -62,9 +64,10 @@ public class UserController {
      * @param age
      * @param email
      * @return R
+     * http://localhost:8080/test/user/updateByid?id=740987882952458240&name=newName&age=100&email=844734655@qq.com
      */
     @RequestMapping("/updateByid")
-    public R updateByid(Integer id,String name,Integer age,String email){
+    public R updateByid(Long id,String name,Integer age,String email){
         boolean b = userService.update(
                 new UpdateWrapper<User>().set("name",name).set("age",age).set("email",email).eq("id",id)
         );
@@ -78,8 +81,10 @@ public class UserController {
     @RequestMapping("/addUser")
     public R addUser(String name,Integer age,String email){
 
-        boolean save = userService.save(new User().setAge(age).setName(name).setEmail(email));
-        return R.ok(save);
+        for (int i = 0; i < 10000; i++) {
+            userService.save(new User().setAge(age).setName(name).setEmail(email));
+        }
+        return R.ok("ok");
     }
 
     public static void main(String[] args) {

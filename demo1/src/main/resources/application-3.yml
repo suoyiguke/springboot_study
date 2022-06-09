@@ -1,0 +1,62 @@
+# 一主两从的读写分离
+spring:
+  shardingsphere:
+    datasource:
+      names: write_ds_0,write_ds_0_read_0,write_ds_0_read_1
+      write_ds_0:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://localhost:3306/jdbcstudy_w?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&useTimezone=true
+        username: root
+        password: 123456
+      write_ds_0_read_0:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://localhost:3307/jdbcstudy_r?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&useTimezone=true
+        username: root
+        password: 123456
+      write_ds_0_read_1:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://localhost:3307/jdbcstudy_r?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&useTimezone=true
+        username: root
+        password: 123456
+
+    rules:
+      readwrite-splitting:
+        data-sources:
+          ds_0:
+            props:
+              read-data-source-names: write_ds_0_read_1,write_ds_0_read_0
+              write-data-source-name: write_ds_0
+            type: Static
+      sharding:
+        binding-tables:
+          - user
+        default-database-strategy:
+          standard:
+            sharding-algorithm-name: database-inline
+            sharding-column: id
+        key-generators:
+          snowflake:
+            type: SNOWFLAKE
+        sharding-algorithms:
+          database-inline:
+            props:
+              algorithm-expression: ds_0
+            type: INLINE
+          t-order-inline:
+            props:
+              algorithm-expression: user_$->{id % 10}
+            type: INLINE
+        tables:
+          user:
+            actual-data-nodes: ds_0.user_$->{0..9}
+            key-generate-strategy:
+              column: id
+              key-generator-name: snowflake
+            table-strategy:
+              standard:
+                sharding-algorithm-name: t-order-inline
+                sharding-column: id
+

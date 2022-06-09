@@ -1,0 +1,44 @@
+# 1 只分表不分库
+spring:
+  shardingsphere:
+    mode:
+      type: Memory
+    datasource:
+      names: ds
+      ds:
+        type: com.zaxxer.hikari.HikariDataSource
+        driverClassName: com.mysql.jdbc.Driver
+        url: jdbc:mysql://localhost:3306/jdbcstudy1?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&useTimezone=true
+        username: root
+        password: 123456
+
+    rules:
+      sharding:
+        binding-tables:
+          - user
+        key-generators:
+          snowflake:
+            type: SNOWFLAKE
+        sharding-algorithms:
+          user-inline:
+            props:
+              algorithm-expression: user_$->{id % 10}
+            type: INLINE
+
+        tables:
+          user:
+            actual-data-nodes: ds.user_$->{0..9}
+            key-generate-strategy:
+              column: id
+              key-generator-name: snowflake
+            table-strategy:
+              standard:
+                sharding-algorithm-name: user-inline
+                sharding-column: id
+
+
+
+logging:
+  level:
+    com.baomidou: debug
+    org.apache.shardingsphere: debug
