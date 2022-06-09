@@ -24,15 +24,20 @@ spring:
 
     rules:
       readwrite-splitting:
+        # 定义读写分离数据源 ds_0（也是一个逻辑数据源，只不过它是多个逻辑数据源的集合）
         data-sources:
           ds_0:
             props:
+              # 读数据源
               read-data-source-names: write_ds_0_read_1,write_ds_0_read_0
+              # 写数据源
               write-data-source-name: write_ds_0
             type: Static
       sharding:
         binding-tables:
           - user
+
+        #  引用分库策略
         default-database-strategy:
           standard:
             sharding-algorithm-name: database-inline
@@ -40,23 +45,33 @@ spring:
         key-generators:
           snowflake:
             type: SNOWFLAKE
+
+        # 定义分片策略
         sharding-algorithms:
+          #分库策略
           database-inline:
             props:
+              # 引用逻辑数据源
               algorithm-expression: ds_0
             type: INLINE
-          t-order-inline:
+          # 分表策略
+          user-inline:
             props:
               algorithm-expression: user_$->{id % 10}
             type: INLINE
+
+        # 表的分布策略（均匀分布；自定义分布）
         tables:
           user:
+            # 引用逻辑数据源作为表分布策略的组成部分
             actual-data-nodes: ds_0.user_$->{0..9}
+            # 分布式id生成策略
             key-generate-strategy:
               column: id
               key-generator-name: snowflake
+            # 引用分表策略
             table-strategy:
               standard:
-                sharding-algorithm-name: t-order-inline
+                sharding-algorithm-name: user-inline
                 sharding-column: id
 
